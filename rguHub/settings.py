@@ -258,6 +258,22 @@ if not DEBUG:
 else:
     SECURE_SSL_REDIRECT = False
 
+# Rate limiting cache (Redis in production, local memory in dev)
+REDIS_URL = os.getenv('REDIS_URL', None)
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
+    }
+    
 # Basic logging configuration
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
 LOGGING = {

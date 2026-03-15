@@ -1,14 +1,14 @@
 """
 RGU Hub Backend - Resources App Views
-
+ 
 This module contains Django REST Framework ViewSets for handling API requests
 related to study materials, subjects, and material types.
-
+ 
 ViewSets Overview:
 - MaterialTypeViewSet: Read-only access to material types
 - SubjectMaterialViewSet: CRUD operations for study materials with filtering
 - SubjectViewSet: Read-only access to subjects with course/year/semester filtering
-
+ 
 API Endpoints:
 - GET /material-types/ - List all material types
 - GET /materials/ - List all materials
@@ -18,18 +18,20 @@ API Endpoints:
 - GET /subjects/?course=BSCN - Filter by program
 - GET /subjects/?course=BSCN&sem=1 - Filter by program and semester
 - GET /subjects/?course=BSCN&year=1 - Filter by program and year
-
+ 
 Author: RGU Hub Development Team
 Last Updated: 2025
 """
-
+ 
 from rest_framework import viewsets
 from .models import SubjectMaterial, Subject, MaterialType
 from .serializers import SubjectMaterialSerializer, SubjectSerializer, MaterialTypeSerializer
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 import logging
-
+ 
 logger = logging.getLogger(__name__)
-
+ 
 class MaterialTypeViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Read-only ViewSet for MaterialType model.
@@ -53,13 +55,14 @@ class MaterialTypeViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = MaterialType.objects.all()
     serializer_class = MaterialTypeSerializer
-
+ 
 class SubjectMaterialViewSet(viewsets.ModelViewSet):
     """
     CRUD ViewSet for SubjectMaterial model with advanced filtering.
     
     Supports filtering by subject slug and material type slug.
     Provides full CRUD operations for study materials.
+    Rate limited to 30 requests/minute per IP to prevent bot scraping.
     
     Endpoints:
     - GET /materials/ - List all materials
@@ -96,7 +99,8 @@ class SubjectMaterialViewSet(viewsets.ModelViewSet):
     """
     queryset = SubjectMaterial.objects.all()
     serializer_class = SubjectMaterialSerializer
-
+ 
+    @method_decorator(ratelimit(key='ip', rate='30/m', block=True))
     def list(self, request, *args, **kwargs):
         """
         Override list method to add custom filtering logic.
@@ -106,6 +110,7 @@ class SubjectMaterialViewSet(viewsets.ModelViewSet):
         2. Material type slug (if provided)
         
         Logs filtering operations for debugging.
+        Rate limited to 30 requests/minute per IP.
         """
         subject_slug = request.query_params.get("subject")
         material_type = request.query_params.get("type")
@@ -124,7 +129,7 @@ class SubjectMaterialViewSet(viewsets.ModelViewSet):
         logger.info(f"[SubjectMaterialViewSet] Final queryset count: {qs.count()}")
         self.queryset = qs
         return super().list(request, *args, **kwargs)
-
+ 
 class SubjectViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Read-only ViewSet for Subject model with course and term filtering.
@@ -160,7 +165,7 @@ class SubjectViewSet(viewsets.ReadOnlyModelViewSet):
         "term", "term__syllabus", "term__syllabus__program"
     )
     serializer_class = SubjectSerializer
-
+ 
     def get_queryset(self):
         """
         Override get_queryset to add custom filtering logic.
@@ -176,13 +181,13 @@ class SubjectViewSet(viewsets.ReadOnlyModelViewSet):
         course = self.request.query_params.get("course")
         year = self.request.query_params.get("year")
         sem = self.request.query_params.get("sem")
-
+ 
         if not course:
             return qs  # no course provided, return all
-
+ 
         # make course case-insensitive
         qs = qs.filter(term__syllabus__program__short_name__iexact=course)
-
+ 
         if sem:
             try:
                 sem = int(sem)
@@ -195,7 +200,5 @@ class SubjectViewSet(viewsets.ReadOnlyModelViewSet):
                 qs = qs.filter(term__term_type="YEAR", term__term_number=year)
             except (TypeError, ValueError):
                 return qs.none()  # invalid year
-        # Avoid printing raw SQL in production; use logger at debug level instead if needed
-
+ 
         return qs
-
