@@ -28,6 +28,7 @@ from .models import SubjectMaterial, Subject, MaterialType
 from .serializers import SubjectMaterialSerializer, SubjectSerializer, MaterialTypeSerializer
 from django_ratelimit.decorators import ratelimit
 from django.utils.decorators import method_decorator
+from rest_framework.pagination import PageNumberPagination
 import logging
  
 logger = logging.getLogger(__name__)
@@ -55,6 +56,11 @@ class MaterialTypeViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = MaterialType.objects.all()
     serializer_class = MaterialTypeSerializer
+
+class MaterialPagination(PageNumberPagination):
+    page_size = 50
+    page_size_query_param = 'page_size'
+    max_page_size = 100
  
 class SubjectMaterialViewSet(viewsets.ModelViewSet):
     """
@@ -99,6 +105,7 @@ class SubjectMaterialViewSet(viewsets.ModelViewSet):
     """
     queryset = SubjectMaterial.objects.all()
     serializer_class = SubjectMaterialSerializer
+    pagination_class = MaterialPagination 
  
     @method_decorator(ratelimit(key='ip', rate='30/m', block=True))
     def list(self, request, *args, **kwargs):
@@ -129,6 +136,8 @@ class SubjectMaterialViewSet(viewsets.ModelViewSet):
         logger.info(f"[SubjectMaterialViewSet] Final queryset count: {qs.count()}")
         self.queryset = qs
         return super().list(request, *args, **kwargs)
+
+    
  
 class SubjectViewSet(viewsets.ReadOnlyModelViewSet):
     """
