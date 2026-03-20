@@ -29,6 +29,8 @@ from .serializers import SubjectMaterialSerializer, SubjectSerializer, MaterialT
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 import logging
+from rest_framework.decorators import throttle_classes
+from rest_framework.throttling import AnonRateThrottle
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +73,7 @@ class SubjectMaterialViewSet(viewsets.ModelViewSet):
     """
     queryset = SubjectMaterial.objects.all()
     serializer_class = SubjectMaterialSerializer
+    throttle_classes = [AnonRateThrottle]
 
     @method_decorator(cache_page(60 * 15))  # cache for 15 minutes
     def list(self, request, *args, **kwargs):
