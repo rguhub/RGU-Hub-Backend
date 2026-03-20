@@ -75,7 +75,7 @@ class SubjectMaterialViewSet(viewsets.ModelViewSet):
     serializer_class = SubjectMaterialSerializer
     throttle_classes = [AnonRateThrottle]
 
-    @method_decorator(cache_page(60 * 15))  # cache for 15 minutes
+      # cache for 15 minutes
     def list(self, request, *args, **kwargs):
         """
         Override list method to add custom filtering logic.

@@ -1,5 +1,3 @@
-
-
 """
 Django settings for rguHub project.
 
@@ -49,7 +47,6 @@ if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -72,9 +69,8 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.SearchFilter',
-        'rest_framework.filters.OrderingFilter',    
+        'rest_framework.filters.OrderingFilter',
     ],
-    
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
     ],
@@ -93,10 +89,7 @@ if not DEBUG:
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    
-    
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -132,7 +125,6 @@ WSGI_APPLICATION = 'rguHub.wsgi.application'
 # Database configuration
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL:
-    # Use dj-database-url for PostgreSQL (including Neon)
     import dj_database_url
     DATABASES = {
         'default': dj_database_url.parse(
@@ -142,7 +134,6 @@ if DATABASE_URL:
         )
     }
 else:
-    # Fallback to SQLite for local development
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -152,8 +143,6 @@ else:
 
 
 # Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -171,8 +160,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -182,22 +169,16 @@ USE_I18N = True
 USE_TZ = True
 
 
-
 # Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS
-# Prefer explicit allowlist in production; allow-all can be enabled locally via env
 CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', 'False').lower() in ['1','true','yes','on']
 if not CORS_ALLOW_ALL_ORIGINS:
     CORS_ALLOWED_ORIGINS = [o.strip() for o in os.getenv('CORS_ALLOWED_ORIGINS', 'https://www.rguhub.site,https://rguhub.site,http://127.0.0.1').split(',') if o.strip()]
 
-
-# CSRF Trusted Origins (e.g., https://*.onrender.com)
+# CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv('CSRF_TRUSTED_ORIGINS','').split(',') if o.strip()]
-
 
 # Media / File storage
 CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME", "")
@@ -205,7 +186,6 @@ CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY", "")
 CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET", "")
 
 USE_CLOUDINARY = all([CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET]) and not DEBUG
-
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -235,8 +215,6 @@ else:
 
 WHITENOISE_MANIFEST_STRICT = False
 
-
-
 if USE_CLOUDINARY:
     CLOUDINARY_STORAGE = {
         "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
@@ -264,7 +242,7 @@ if not DEBUG:
 else:
     SECURE_SSL_REDIRECT = False
 
-# Rate limiting cache (Redis in production, local memory in dev)
+# Cache (Redis in production, local memory in dev)
 REDIS_URL = os.getenv('REDIS_URL', None)
 if REDIS_URL:
     CACHES = {
@@ -279,7 +257,7 @@ else:
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         }
     }
-    
+
 # Basic logging configuration
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
 LOGGING = {
