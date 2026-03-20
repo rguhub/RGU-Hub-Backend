@@ -105,7 +105,7 @@ class SubjectMaterialViewSet(viewsets.ModelViewSet):
     """
     queryset = SubjectMaterial.objects.all()
     serializer_class = SubjectMaterialSerializer
-    pagination_class = MaterialPagination 
+    
  
     @method_decorator(ratelimit(key='ip', rate='30/m', block=True))
     def list(self, request, *args, **kwargs):
