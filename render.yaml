@@ -19,11 +19,11 @@ services:
       - key: DJANGO_SETTINGS_MODULE
         value: rguHub.settings
       - key: ALLOWED_HOSTS
-        value: "rgu-hub-backend.onrender.com"
+        value: "https://rgu-hub-backend-cubv.onrender.com"
       - key: LOG_LEVEL
         value: "INFO"
       - key: CSRF_TRUSTED_ORIGINS
-        value: "https://rgu-hub-backend.onrender.com"
+        value: "https://rgu-hub-backend-cubv.onrender.com"
       - key: PYTHONUNBUFFERED
         value: "1"
       - key: PYTHONPATH
