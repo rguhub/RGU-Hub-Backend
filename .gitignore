@@ -60,3 +60,6 @@ Thumbs.db
 
 # Temporary files
 transfer_data.py
+db.sqlite3
+backup.json
+backup_fixed.json
